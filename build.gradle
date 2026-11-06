@@ -1,0 +1,4 @@
+// Top-level build file. Plugin versions are resolved from google()/mavenCentral() (see settings.gradle).
+plugins {
+    id 'com.android.application' version '8.9.0' apply false
+}

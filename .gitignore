@@ -5,3 +5,20 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Gradle / Android build output
+.gradle/
+build/
+app/build/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Machine specific configuration
+local.properties
+
+# IDE files
+*.iml
+.idea/
+out/
+

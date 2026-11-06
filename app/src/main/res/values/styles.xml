@@ -1,0 +1,88 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowBackground">@color/surface</item>
+        <item name="alertDialogTheme">@style/Theme.Threecker.Dialog</item>
+        <item name="materialAlertDialogTheme">@style/Theme.Threecker.Dialog</item>
+    </style>
+    <style name="Theme.Threecker.Dialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+        <!-- Dialog buttons otherwise inherit colorPrimary, which is too dark in the night theme -->
+        <item name="colorPrimary">@color/accent_text</item>
+        <item name="colorAccent">@color/accent_text</item>
+    </style>
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
+
+    <!-- Cards -->
+    <style name="Widget.Threecker.Card" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/surface_card</item>
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeColor">@color/divider</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <!-- Error card, e.g. the "NFC is off" panel -->
+    <style name="Widget.Threecker.ErrorCard" parent="Widget.Threecker.Card">
+        <item name="cardBackgroundColor">@color/error_bg</item>
+        <item name="strokeColor">@color/error_border</item>
+    </style>
+
+    <!-- Top tabs on the teal app bar -->
+    <style name="Widget.Threecker.Tabs" parent="Widget.MaterialComponents.TabLayout">
+        <item name="tabTextColor">@color/tab_text</item>
+        <item name="tabSelectedTextColor">@android:color/white</item>
+        <item name="tabIndicatorColor">@color/colorAccent</item>
+        <item name="tabIndicatorHeight">3dp</item>
+        <item name="tabIndicatorFullWidth">false</item>
+    </style>
+
+    <!-- Outlined / text buttons: colorPrimary is too dark for text in the night theme -->
+    <style name="Widget.Threecker.Button.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textColor">@color/accent_text</item>
+        <item name="strokeColor">@color/accent_text</item>
+        <item name="rippleColor">@color/accent_text</item>
+    </style>
+
+    <style name="Widget.Threecker.Button.Text" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/accent_text</item>
+        <item name="rippleColor">@color/accent_text</item>
+    </style>
+
+    <!-- Filled primary action: the inherited colorOnPrimary is black, which made "Write to card"
+         look disabled, so the label color is spelled out. -->
+    <style name="Widget.Threecker.Button.Primary" parent="Widget.MaterialComponents.Button">
+        <item name="android:textColor">@color/on_primary</item>
+        <item name="backgroundTint">@color/colorPrimary</item>
+        <item name="iconTint">@color/on_primary</item>
+    </style>
+
+    <style name="Widget.Threecker.Button.Error" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textColor">@color/error_text</item>
+        <item name="strokeColor">@color/error_text</item>
+        <item name="rippleColor">@color/error_text</item>
+    </style>
+
+    <!-- Small uppercase field label -->
+    <style name="TextAppearance.Threecker.Label" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textColor">@color/ink_muted</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.08</item>
+    </style>
+
+    <!-- Field value -->
+    <style name="TextAppearance.Threecker.Value" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+</resources>

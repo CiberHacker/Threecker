@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Night palette: same names as values/colors.xml so every layout follows the theme. -->
+    <color name="colorPrimary">#1E6474</color>
+    <color name="colorPrimaryDark">#123C46</color>
+    <color name="colorAccent">#58d2ff</color>
+
+    <color name="surface">#0C1417</color>
+    <color name="surface_card">#152024</color>
+    <color name="ink">#E8F1F3</color>
+    <color name="ink_muted">#93A6AC</color>
+    <color name="divider">#25333A</color>
+
+    <color name="status_bg">#153038</color>
+    <color name="status_text">#A9E4F0</color>
+
+    <color name="terminal_bg">#050B0D</color>
+    <color name="terminal_text">#A9E4F0</color>
+    <color name="terminal_label">#5FA8B9</color>
+
+    <color name="tab_text">#8FB4BC</color>
+
+    <color name="dump_header_text">#8FD3E2</color>
+
+    <color name="accent_text">#8FD9EA</color>
+
+    <color name="card_ink">#0B3A49</color>
+
+    <color name="on_primary">#FFFFFF</color>
+    <color name="card_hint_text">#FFFFFF</color>
+
+    <color name="error_bg">#3A1B1A</color>
+    <color name="error_border">#6B2C29</color>
+    <color name="error_text">#F2B8B5</color>
+
+    <color name="status_bar">#0B2025</color>
+</resources>

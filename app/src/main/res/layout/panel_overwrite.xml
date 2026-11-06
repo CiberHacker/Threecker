@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/panel_overwrite"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/surface"
+    android:fillViewport="true"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/activity_horizontal_margin">
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/nfc_off_card"
+            style="@style/Widget.Threecker.ErrorCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/nfc_off_title"
+                    android:textColor="@color/error_text"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:lineSpacingExtra="3dp"
+                    android:text="@string/nfc_off_body"
+                    android:textColor="@color/error_text"
+                    android:textSize="13sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_enable_nfc"
+                    style="@style/Widget.Threecker.Button.Error"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/action_open_nfc_settings"
+                    android:textAllCaps="false"
+                    app:cornerRadius="12dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:id="@+id/status_pill"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_status"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="14dp"
+            android:paddingRight="4dp">
+
+            <TextView
+                android:id="@+id/status_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/status_tap_card"
+                android:textColor="@color/status_text"
+                android:textSize="14sp" />
+
+            <ImageButton
+                android:id="@+id/btn_close_dump"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/action_close_dump"
+                android:padding="10dp"
+                android:src="@drawable/ic_close"
+                android:visibility="gone"
+                app:tint="@color/status_text" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/empty_state"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/empty_title"
+                android:textColor="@color/ink"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center_horizontal"
+                android:lineSpacingExtra="4dp"
+                android:text="@string/empty_body"
+                android:textColor="@color/ink_muted"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/dump_details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <cc.troikadumper.CardFlipView
+                android:id="@+id/card_flip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:contentDescription="@string/card_description">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/card_front_description"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/troika_card_front" />
+
+                    <!-- Drawn on the artwork itself, so the hint is where the finger goes. -->
+                    <TextView
+                        android:id="@+id/card_flip_hint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top|end"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginRight="12dp"
+                        android:background="@drawable/bg_card_hint"
+                        android:paddingLeft="9dp"
+                        android:paddingTop="5dp"
+                        android:paddingRight="9dp"
+                        android:paddingBottom="5dp"
+                        android:text="@string/card_flip_hint"
+                        android:textColor="@color/card_hint_text"
+                        android:textSize="11sp" />
+                </FrameLayout>
+
+                <cc.troikadumper.TroikaCardBackView
+                    android:id="@+id/card_back"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </cc.troikadumper.CardFlipView>
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.Threecker.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="18dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_balance"
+                        android:textAppearance="@style/TextAppearance.Threecker.Label" />
+
+                    <!-- The edit icon sits next to the big value: next to the label it inflated the
+                         row to 40dp and pushed the label ~12dp down. -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/value_balance"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="@color/ink"
+                            android:textSize="34sp"
+                            android:textStyle="bold"
+                            tools:text="430 RUB" />
+
+                        <ImageButton
+                            android:id="@+id/btn_edit_balance"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/edit_balance"
+                            android:padding="9dp"
+                            android:src="@drawable/ic_edit"
+                            app:tint="@color/accent_text" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/value_card_number"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:fontFamily="monospace"
+                        android:textColor="@color/ink_muted"
+                        android:textSize="14sp"
+                        tools:text="0019 088 743" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.Threecker.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="18dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/label_last_usage"
+                                android:textAppearance="@style/TextAppearance.Threecker.Label" />
+
+                            <TextView
+                                android:id="@+id/value_last_usage"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:textAppearance="@style/TextAppearance.Threecker.Value"
+                                tools:text="03.11.2026, 13:55" />
+                        </LinearLayout>
+
+                        <ImageButton
+                            android:id="@+id/btn_edit_usage"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/edit_last_usage"
+                            android:padding="9dp"
+                            android:src="@drawable/ic_edit"
+                            app:tint="@color/accent_text" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="14dp"
+                        android:layout_marginBottom="14dp"
+                        android:background="@color/divider" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/label_last_validator"
+                                android:textAppearance="@style/TextAppearance.Threecker.Label" />
+
+                            <TextView
+                                android:id="@+id/value_last_validator"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:textAppearance="@style/TextAppearance.Threecker.Value"
+                                tools:text="ID# 258" />
+                        </LinearLayout>
+
+                        <ImageButton
+                            android:id="@+id/btn_edit_validator"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/edit_last_validator"
+                            android:padding="9dp"
+                            android:src="@drawable/ic_edit"
+                            app:tint="@color/accent_text" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="14dp"
+                        android:layout_marginBottom="14dp"
+                        android:background="@color/divider" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_uid"
+                        android:textAppearance="@style/TextAppearance.Threecker.Label" />
+
+                    <TextView
+                        android:id="@+id/value_uid"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:fontFamily="monospace"
+                        android:textAppearance="@style/TextAppearance.Threecker.Value"
+                        tools:text="04AA0102" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="14dp"
+                        android:layout_marginBottom="14dp"
+                        android:background="@color/divider" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/label_saved_as"
+                                android:textAppearance="@style/TextAppearance.Threecker.Label" />
+
+                            <TextView
+                                android:id="@+id/value_saved_as"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:textAppearance="@style/TextAppearance.Threecker.Value"
+                                tools:text="2026-11-03_135522_30050636_430RUB.txt" />
+                        </LinearLayout>
+
+                        <ImageButton
+                            android:id="@+id/btn_edit_saved_as"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/edit_saved_as"
+                            android:padding="9dp"
+                            android:src="@drawable/ic_edit"
+                            android:visibility="gone"
+                            app:tint="@color/accent_text" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_terminal"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/raw_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.08"
+                    android:textAllCaps="true"
+                    android:textColor="@color/terminal_label"
+                    android:textSize="11sp"
+                    tools:text="SECTOR 8 · RAW DATA" />
+
+                <TextView
+                    android:id="@+id/value_blocks"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="monospace"
+                    android:lineSpacingExtra="6dp"
+                    android:textColor="@color/terminal_text"
+                    android:textSize="12sp"
+                    tools:text="0] 00000012345670000000000000000000" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_write"
+                style="@style/Widget.Threecker.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/action_write_to_card"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                app:cornerRadius="14dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_share"
+                style="@style/Widget.Threecker.Button.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_gravity="end"
+                android:layout_marginTop="4dp"
+                android:text="@string/action_share"
+                android:textAllCaps="false"
+                app:cornerRadius="14dp" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

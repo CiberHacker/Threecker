@@ -1,0 +1,148 @@
+<resources>
+    <string name="app_name">Threecker</string>
+    <string name="app_subtitle">Troika card · sector 8</string>
+    <string name="action_switch_to_dark">Switch to dark theme</string>
+    <string name="action_switch_to_light">Switch to light theme</string>
+
+    <!-- Tabs -->
+    <string name="tab_overwrite">Overwrite</string>
+    <string name="tab_dumps">Dumps</string>
+    <string name="tab_about">About</string>
+
+    <!-- Overwrite tab -->
+    <string name="status_tap_card">Ready — tap a Troika card to read it</string>
+    <string name="empty_title">No card loaded</string>
+    <string name="empty_body">Hold a Troika card against the back of the phone. Sector 8 is read and saved automatically, and the dump stays available in the Dumps tab.</string>
+    <string name="label_balance">Balance</string>
+    <string name="label_last_usage">Last usage</string>
+    <string name="label_last_validator">Last validator</string>
+    <string name="label_uid">Card UID</string>
+    <string name="label_saved_as">Saved as</string>
+    <string name="section_raw">Sector %1$d · raw data</string>
+    <string name="action_write_to_card">Write to card</string>
+    <string name="action_share">Share</string>
+    <string name="action_close_dump">Close dump</string>
+    <string name="value_not_saved">Not saved</string>
+    <string name="card_flip_hint">Tap the card to flip</string>
+    <string name="card_description">Troika card — tap to flip</string>
+    <string name="card_front_description">Troika card, front</string>
+    <string name="card_balance_amount">%1$d ₽</string>
+
+    <!-- Read / write flow -->
+    <string name="read_in_progress">Reading from card…</string>
+    <string name="read_from_file_in_progress">Reading from file…</string>
+    <string name="write_in_progress">Writing to card…</string>
+    <string name="status_read_ok">Card read. Saved as %1$s</string>
+    <string name="status_read_ok_not_saved">Card read, but the dump could not be saved: %1$s</string>
+    <string name="status_read_failed">Could not read the card.</string>
+    <string name="status_file_loaded">Dump loaded: %1$s</string>
+    <string name="status_file_failed">Could not open the dump.</string>
+    <string name="status_written_verified">Written and verified.</string>
+    <string name="status_written_unverified">Written, but the read back data does not match the dump.</string>
+    <string name="status_write_failed">Write failed.</string>
+    <string name="status_wrong_card">Wrong card — nothing was written.</string>
+    <string name="status_balance_updated">Balance updated to %1$s</string>
+    <string name="waiting_for_card">Waiting for card…</string>
+
+    <!-- Write confirmation -->
+    <string name="dialog_write_title">Write dump to card</string>
+    <string name="dialog_write_message">The loaded dump is written back to the card it was taken from.\n\nCard: %1$s\nBalance: %2$s\nLast usage: %3$s\nDump UID: %4$s\n\nTap that same card when asked. Any other card is rejected.</string>
+    <string name="dialog_write_confirm">Write</string>
+
+    <!-- Errors -->
+    <string name="error_no_nfc">No NFC adapter on your device</string>
+    <string name="error_nfc_is_disabled">NFC is off — the card cannot be read</string>
+    <string name="nfc_off_title">NFC is off</string>
+    <string name="nfc_off_body">Turn NFC on in the system settings and come back to this app — it picks the change up immediately, no restart needed.</string>
+    <string name="action_open_nfc_settings">Open NFC settings</string>
+    <string name="dialog_nfc_title">Turn on NFC</string>
+    <string name="dialog_nfc_message">NFC is disabled, so the card cannot be read. Open the system settings and switch NFC on? Threecker notices it as soon as you come back — no restart needed.</string>
+    <string name="dialog_nfc_open">Open settings</string>
+    <string name="error_read_title">Could not read card</string>
+    <string name="error_write_title">Could not write card</string>
+    <string name="error_read_file_title">Could not open dump</string>
+    <string name="error_save_title">Could not save dump</string>
+    <string name="error_uid_mismatch_title">Wrong card</string>
+    <string name="error_uid_mismatch_message">The tapped card has UID %2$s, but this dump belongs to %1$s.\n\nNothing was written. Tap the card the dump was taken from.</string>
+    <string name="error_unknown">Unknown error</string>
+
+    <!-- Dumps tab -->
+    <string name="dumps_hint">Tap a card to show its dumps, long press a dump for details, duplicate or delete.</string>
+    <string name="dumps_empty_title">No saved dumps yet</string>
+    <string name="dumps_empty_body">Every card you read is stored here automatically.</string>
+    <string name="dumplist_group_header">Card %1$s · %2$d dumps</string>
+    <string name="dumplist_balance">Balance: %1$s RUB</string>
+    <string name="dumplist_unknown_card">Unknown card</string>
+    <string name="dump_actions_title">Dump actions</string>
+    <string name="action_edit_details">Edit details</string>
+    <string name="action_duplicate">Duplicate</string>
+    <string name="action_delete">Delete</string>
+    <string name="dialog_delete_title">Delete dump</string>
+    <string name="dialog_delete_message">Delete %1$s?\n\nThe saved file and its name/description are removed from this phone. The card itself is not touched.</string>
+    <string name="dialog_delete_confirm">Delete</string>
+    <string name="status_dump_deleted">Dump deleted: %1$s</string>
+    <string name="error_delete">Could not delete the dump</string>
+    <string name="dump_duplicated">Dump duplicated</string>
+    <string name="dump_duplicate_name">%1$s (copy)</string>
+    <string name="error_duplicate">Could not duplicate the dump</string>
+    <string name="dumplist_collapse">Collapse this card</string>
+    <string name="dumplist_expand">Expand this card</string>
+    <string name="edit_balance">Edit balance</string>
+    <string name="edit_last_usage">Edit last usage</string>
+    <string name="edit_last_validator">Edit last validator</string>
+    <string name="edit_saved_as">Edit name and description</string>
+    <string name="status_usage_updated">Last usage updated to %1$s</string>
+    <string name="status_validator_updated">Last validator updated to %1$s</string>
+    <string name="action_save">Save</string>
+    <string name="details_saved">Dump details saved</string>
+    <string name="error_save_details">Could not save the dump details</string>
+    <string name="dialog_details_title">Dump details</string>
+    <string name="dialog_details_name_hint">Name</string>
+    <string name="dialog_details_description_hint">Description</string>
+
+    <!-- Balance dialog -->
+    <string name="dialog_edit_balance_title">Edit balance</string>
+    <string name="dialog_edit_balance_message">Enter the new balance in rubles (whole number).</string>
+    <string name="dialog_edit_balance_hint">Balance (RUB)</string>
+    <string name="action_set">Set</string>
+    <string name="error_invalid_balance">Invalid balance value</string>
+
+    <!-- Last usage / validator editors -->
+    <string name="dialog_edit_usage_date_title">Last usage date</string>
+    <string name="dialog_edit_usage_time_title">Last usage time</string>
+    <string name="dialog_edit_validator_title">Edit last validator</string>
+    <string name="dialog_edit_validator_message">Validator ID (0–65535). The validator shares its bytes with the last usage time, so the decoded time changes as well.</string>
+    <string name="error_invalid_validator">Invalid validator ID</string>
+
+    <!-- Sharing -->
+    <string name="share_dump">Share dump</string>
+    <string name="share_as_text">As text</string>
+    <string name="share_as_json">As JSON</string>
+    <string name="share_subject">Troika dump, card %1$s</string>
+
+    <!-- Diff tool -->
+    <string name="diff_title">Diff tool</string>
+    <string name="diff_subtitle">compare two dumps</string>
+    <string name="diff_need_two">Save at least two dumps to compare them.</string>
+    <string name="diff_summary_none">Both dumps are identical.</string>
+    <string name="diff_summary_changed">%1$d of %2$d fields differ.</string>
+    <string name="diff_field_uid">Card UID</string>
+    <string name="diff_field_card_number">Card number</string>
+    <string name="diff_field_balance">Balance</string>
+    <string name="diff_field_last_usage">Last usage</string>
+    <string name="diff_field_last_validator">Last validator</string>
+    <string name="diff_field_block">Block %1$d</string>
+    <string name="diff_pick_a">Dump A</string>
+    <string name="diff_pick_b">Dump B</string>
+    <string name="diff_error">Error: %1$s</string>
+
+    <!-- About tab -->
+    <string name="about_lead">Read, save and restore the sector 8 memory of a Moscow Troika card.</string>
+    <string name="about_body">Threecker talks to the MIFARE Classic chip over NFC: it reads sector 8, decodes the card number, balance, last usage time and validator, and keeps every read as a dump. Writing sends a stored dump back to the same card and verifies it afterwards.</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_safety_title">Before you write</string>
+    <string name="about_safety_body">Keep balances under 100 RUB. Never enter the metro twice with the same last usage time — after writing a dump, refresh the time on a ground transport validator. Only phones with an NXP NFC chip can read Troika cards.</string>
+    <string name="tools_title">Tools</string>
+    <string name="tools_diff_title">Diff tool</string>
+    <string name="tools_diff_body">Compare two saved dumps field by field.</string>
+</resources>

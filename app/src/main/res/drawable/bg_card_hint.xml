@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pill drawn on the card artwork: translucent ink so the white hint stays readable -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#660B1A20" />
+    <corners android:radius="9dp" />
+</shape>

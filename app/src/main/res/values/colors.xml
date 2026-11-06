@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand (toolbar, tabs, primary action) -->
+    <color name="colorPrimary">#24768A</color>
+    <color name="colorPrimaryDark">#1e5571</color>
+    <color name="colorAccent">#58d2ff</color>
+
+    <!-- Light surfaces -->
+    <color name="surface">#F1F5F6</color>
+    <color name="surface_card">#FFFFFF</color>
+    <color name="ink">#11262C</color>
+    <color name="ink_muted">#5F7379</color>
+    <color name="divider">#E2EAEC</color>
+
+    <!-- Status pill -->
+    <color name="status_bg">#E2EEF1</color>
+    <color name="status_text">#1B5A69</color>
+
+    <!-- Dark "sector raw data" panel -->
+    <color name="terminal_bg">#0E2127</color>
+    <color name="terminal_text">#A9E4F0</color>
+    <color name="terminal_label">#5FA8B9</color>
+
+    <!-- Tab labels on the teal app bar -->
+    <color name="tab_text">#B7D5DC</color>
+
+    <!-- Dump list group headers (readable on the light surface) -->
+    <color name="dump_header_text">#1B5A69</color>
+
+    <!-- Text/icons of outlined and text buttons (must stay readable in both themes) -->
+    <color name="accent_text">#1F6C80</color>
+
+    <!-- Ink used on the white fields of the card back image -->
+    <color name="card_ink">#0B3A49</color>
+
+    <!-- Text on the filled primary action (the default colorOnPrimary is black here) -->
+    <color name="on_primary">#FFFFFF</color>
+
+    <!-- Hint pill drawn on the card artwork; the same in both palettes -->
+    <color name="card_hint_text">#FFFFFF</color>
+
+    <!-- Error surface ("NFC is off") -->
+    <color name="error_bg">#FDECEA</color>
+    <color name="error_border">#E9A6A0</color>
+    <color name="error_text">#8C1D18</color>
+
+    <!-- System status bar (night variant lives in values-night/colors.xml) -->
+    <color name="status_bar">#1e5571</color>
+</resources>
+
