@@ -1,4 +1,4 @@
-package cc.troikadumper.utils;
+package com.ciber.threeker.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;

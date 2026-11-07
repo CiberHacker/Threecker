@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Threecker</string>
-    <string name="app_subtitle">Troika card · sector 8</string>
+    <string name="app_subtitle">Troika card · sectors 8 + 9</string>
     <string name="action_switch_to_dark">Switch to dark theme</string>
     <string name="action_switch_to_light">Switch to light theme</string>
 
@@ -12,7 +12,7 @@
     <!-- Overwrite tab -->
     <string name="status_tap_card">Ready — tap a Troika card to read it</string>
     <string name="empty_title">No card loaded</string>
-    <string name="empty_body">Hold a Troika card against the back of the phone. Sector 8 is read and saved automatically, and the dump stays available in the Dumps tab.</string>
+    <string name="empty_body">Hold a Troika card against the back of the phone. Sectors 8 and 9 are read and saved automatically, and the dump stays available in the Dumps tab.</string>
     <string name="label_balance">Balance</string>
     <string name="label_last_usage">Last usage</string>
     <string name="label_last_validator">Last validator</string>
@@ -41,12 +41,12 @@
     <string name="status_written_unverified">Written, but the read back data does not match the dump.</string>
     <string name="status_write_failed">Write failed.</string>
     <string name="status_wrong_card">Wrong card — nothing was written.</string>
-    <string name="status_balance_updated">Balance updated to %1$s</string>
     <string name="waiting_for_card">Waiting for card…</string>
 
     <!-- Write confirmation -->
     <string name="dialog_write_title">Write dump to card</string>
     <string name="dialog_write_message">The loaded dump is written back to the card it was taken from.\n\nCard: %1$s\nBalance: %2$s\nLast usage: %3$s\nDump UID: %4$s\n\nTap that same card when asked. Any other card is rejected.</string>
+    <string name="dialog_write_sector9_note">This dump also contains sector 9; it is restored together with sector 8.</string>
     <string name="dialog_write_confirm">Write</string>
 
     <!-- Errors -->
@@ -72,7 +72,8 @@
     <string name="dumps_empty_body">Every card you read is stored here automatically.</string>
     <string name="dumplist_group_header">Card %1$s · %2$d dumps</string>
     <string name="dumplist_balance">Balance: %1$s RUB</string>
-    <string name="dumplist_unknown_card">Unknown card</string>
+    <string name="dumplist_unreadable_group">Unreadable files</string>
+    <string name="dumplist_unreadable">Unreadable file</string>
     <string name="dump_actions_title">Dump actions</string>
     <string name="action_edit_details">Edit details</string>
     <string name="action_duplicate">Duplicate</string>
@@ -82,17 +83,19 @@
     <string name="dialog_delete_confirm">Delete</string>
     <string name="status_dump_deleted">Dump deleted: %1$s</string>
     <string name="error_delete">Could not delete the dump</string>
-    <string name="dump_duplicated">Dump duplicated</string>
+    <string name="dump_duplicated">Dump duplicated: %1$s</string>
     <string name="dump_duplicate_name">%1$s (copy)</string>
+    <string name="dumplist_edited">%1$s · edited</string>
     <string name="error_duplicate">Could not duplicate the dump</string>
     <string name="dumplist_collapse">Collapse this card</string>
     <string name="dumplist_expand">Expand this card</string>
     <string name="edit_balance">Edit balance</string>
+    <string name="restore_balance">Restore the scanned balance</string>
     <string name="edit_last_usage">Edit last usage</string>
+    <string name="restore_last_usage">Restore the scanned last usage</string>
     <string name="edit_last_validator">Edit last validator</string>
+    <string name="restore_last_validator">Restore the scanned last validator</string>
     <string name="edit_saved_as">Edit name and description</string>
-    <string name="status_usage_updated">Last usage updated to %1$s</string>
-    <string name="status_validator_updated">Last validator updated to %1$s</string>
     <string name="action_save">Save</string>
     <string name="details_saved">Dump details saved</string>
     <string name="error_save_details">Could not save the dump details</string>
@@ -116,8 +119,10 @@
 
     <!-- Sharing -->
     <string name="share_dump">Share dump</string>
+    <string name="share_as_file">As file</string>
     <string name="share_as_text">As text</string>
     <string name="share_as_json">As JSON</string>
+    <string name="error_share">Could not share the dump</string>
     <string name="share_subject">Troika dump, card %1$s</string>
 
     <!-- Diff tool -->
@@ -137,8 +142,8 @@
     <string name="diff_error">Error: %1$s</string>
 
     <!-- About tab -->
-    <string name="about_lead">Read, save and restore the sector 8 memory of a Moscow Troika card.</string>
-    <string name="about_body">Threecker talks to the MIFARE Classic chip over NFC: it reads sector 8, decodes the card number, balance, last usage time and validator, and keeps every read as a dump. Writing sends a stored dump back to the same card and verifies it afterwards.</string>
+    <string name="about_lead">Read, save and restore the memory of a Moscow Troika card (sectors 8 and 9).</string>
+    <string name="about_body">Threecker talks to the MIFARE Classic chip over NFC: it reads sector 8 and sector 9, decodes the card number, balance, last usage time and validator, and keeps every read as a dump. Writing sends a stored dump back to the same card and verifies it afterwards.</string>
     <string name="about_version">Version %1$s</string>
     <string name="about_safety_title">Before you write</string>
     <string name="about_safety_body">Keep balances under 100 RUB. Never enter the metro twice with the same last usage time — after writing a dump, refresh the time on a ground transport validator. Only phones with an NXP NFC chip can read Troika cards.</string>

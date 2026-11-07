@@ -1,4 +1,4 @@
-package cc.troikadumper;
+package com.ciber.threeker;
 
 import android.content.Context;
 import android.graphics.Bitmap;

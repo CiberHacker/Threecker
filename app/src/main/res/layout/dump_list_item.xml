@@ -4,16 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/selectableItemBackground"
     android:paddingLeft="4dp"
     android:paddingRight="4dp"
     android:paddingBottom="8dp">
 
     <com.google.android.material.card.MaterialCardView
+        android:id="@+id/dump_list_item_card"
         style="@style/Widget.Threecker.Card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="14dp">
+        android:clickable="true"
+        android:focusable="true"
+        app:cardCornerRadius="14dp"
+        app:rippleColor="?attr/colorControlHighlight">
 
         <LinearLayout
             android:layout_width="match_parent"

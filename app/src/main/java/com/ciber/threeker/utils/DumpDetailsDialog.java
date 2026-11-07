@@ -1,4 +1,4 @@
-package cc.troikadumper.utils;
+package com.ciber.threeker.utils;
 
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -9,9 +9,11 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
+import java.io.File;
 import java.io.IOException;
 
-import cc.troikadumper.R;
+import com.ciber.threeker.Dump;
+import com.ciber.threeker.R;
 
 /**
  * Dialog that attaches a name and a description to a saved dump. The values are app-local
@@ -20,26 +22,37 @@ import cc.troikadumper.R;
 public final class DumpDetailsDialog {
 
     public interface OnSavedListener {
-        void onDetailsSaved();
+        /**
+         * @param name        the saved name, or null when it was cleared.
+         * @param description the saved description, or null when it was cleared.
+         */
+        void onDetailsSaved(String name, String description);
     }
 
     private DumpDetailsDialog() {
     }
 
     /**
-     * @param dumpFilename name of the dump file (not a path), used as the metadata key.
+     * Edits the name and the description of one dump file. Both are stored inside the dump file
+     * itself (see {@link Dump#updateDetails(File, String, String)}), so they survive a rename, are
+     * copied together with the dump and are shared with it.
+     *
+     * @param dumpFile           the saved dump file, not a directory.
+     * @param initialName        current name, may be null.
+     * @param initialDescription current description, may be null.
      */
-    public static void show(final Activity activity, final DumpMetadata metadata,
-                            final String dumpFilename, final OnSavedListener listener) {
-        if (activity == null || metadata == null || dumpFilename == null) {
+    public static void show(final Activity activity, final File dumpFile,
+                            String initialName, String initialDescription,
+                            final OnSavedListener listener) {
+        if (activity == null || dumpFile == null) {
             return;
         }
 
         View view = LayoutInflater.from(activity).inflate(R.layout.dialog_dump_details, null);
         final EditText name = (EditText) view.findViewById(R.id.details_name);
         final EditText description = (EditText) view.findViewById(R.id.details_description);
-        name.setText(orEmpty(metadata.getName(dumpFilename)));
-        description.setText(orEmpty(metadata.getDescription(dumpFilename)));
+        name.setText(orEmpty(initialName));
+        description.setText(orEmpty(initialDescription));
 
         new AlertDialog.Builder(activity)
                 .setTitle(R.string.dialog_details_title)
@@ -47,12 +60,13 @@ public final class DumpDetailsDialog {
                 .setPositiveButton(R.string.action_save, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        String newName = name.getText().toString();
+                        String newDescription = description.getText().toString();
                         try {
-                            metadata.put(dumpFilename,
-                                    name.getText().toString(),
-                                    description.getText().toString());
+                            Dump.updateDetails(dumpFile, newName, newDescription);
                             if (listener != null) {
-                                listener.onDetailsSaved();
+                                // The setters normalize: blank means "no name/description".
+                                listener.onDetailsSaved(newName, newDescription);
                             }
                         } catch (IOException e) {
                             Toast.makeText(activity,

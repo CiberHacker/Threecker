@@ -129,7 +129,7 @@
             android:visibility="gone"
             tools:visibility="visible">
 
-            <cc.troikadumper.CardFlipView
+            <com.ciber.threeker.CardFlipView
                 android:id="@+id/card_flip"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -165,11 +165,11 @@
                         android:textSize="11sp" />
                 </FrameLayout>
 
-                <cc.troikadumper.TroikaCardBackView
+                <com.ciber.threeker.TroikaCardBackView
                     android:id="@+id/card_back"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
-            </cc.troikadumper.CardFlipView>
+            </com.ciber.threeker.CardFlipView>
 
             <com.google.android.material.card.MaterialCardView
                 style="@style/Widget.Threecker.Card"
@@ -216,6 +216,18 @@
                             android:contentDescription="@string/edit_balance"
                             android:padding="9dp"
                             android:src="@drawable/ic_edit"
+                            app:tint="@color/accent_text" />
+
+                        <!-- Shown only while the balance differs from the scanned value. -->
+                        <ImageButton
+                            android:id="@+id/btn_restore_balance"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/restore_balance"
+                            android:padding="9dp"
+                            android:src="@drawable/ic_restore"
+                            android:visibility="gone"
                             app:tint="@color/accent_text" />
                     </LinearLayout>
 
@@ -279,6 +291,18 @@
                             android:padding="9dp"
                             android:src="@drawable/ic_edit"
                             app:tint="@color/accent_text" />
+
+                        <!-- Shown while the usage/validator field differs from the scanned bytes. -->
+                        <ImageButton
+                            android:id="@+id/btn_restore_usage"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/restore_last_usage"
+                            android:padding="9dp"
+                            android:src="@drawable/ic_restore"
+                            android:visibility="gone"
+                            app:tint="@color/accent_text" />
                     </LinearLayout>
 
                     <View
@@ -323,6 +347,18 @@
                             android:contentDescription="@string/edit_last_validator"
                             android:padding="9dp"
                             android:src="@drawable/ic_edit"
+                            app:tint="@color/accent_text" />
+
+                        <!-- Shown while the usage/validator field differs from the scanned bytes. -->
+                        <ImageButton
+                            android:id="@+id/btn_restore_validator"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/restore_last_validator"
+                            android:padding="9dp"
+                            android:src="@drawable/ic_restore"
+                            android:visibility="gone"
                             app:tint="@color/accent_text" />
                     </LinearLayout>
 
@@ -416,6 +452,41 @@
 
                 <TextView
                     android:id="@+id/value_blocks"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="monospace"
+                    android:lineSpacingExtra="6dp"
+                    android:textColor="@color/terminal_text"
+                    android:textSize="12sp"
+                    tools:text="0] 00000012345670000000000000000000" />
+            </LinearLayout>
+
+            <!-- Sector 9 mirrors the Sector 8 block above (same terminal style and title), shown
+                 only when the loaded dump carries sector 9 data. Rendering it inside the revenue
+                 block made its title look like plain body text instead of a section label. -->
+            <LinearLayout
+                android:id="@+id/raw_block_sector9"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_terminal"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/raw_title_sector9"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.08"
+                    android:textAllCaps="true"
+                    android:textColor="@color/terminal_label"
+                    android:textSize="11sp"
+                    tools:text="SECTOR 9 · RAW DATA" />
+
+                <TextView
+                    android:id="@+id/value_blocks_sector9"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"

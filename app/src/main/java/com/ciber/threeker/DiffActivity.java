@@ -1,4 +1,4 @@
-package cc.troikadumper;
+package com.ciber.threeker;
 
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -12,16 +12,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Locale;
 
-import cc.troikadumper.utils.ThemeMode;
+import com.ciber.threeker.utils.ThemeMode;
 
 /**
  * Compares two saved dumps field by field (balance, card number, usage info and the raw blocks),
@@ -33,7 +31,7 @@ public class DiffActivity extends AppCompatActivity {
     protected Spinner spinnerB;
     protected TextView diffText;
 
-    protected String[] filenames = new String[0];
+    protected List<DumpGrouping.Entry> entries = new ArrayList<DumpGrouping.Entry>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,17 +53,17 @@ public class DiffActivity extends AppCompatActivity {
         spinnerA = (Spinner) findViewById(R.id.spinner_dump_a);
         spinnerB = (Spinner) findViewById(R.id.spinner_dump_b);
 
-        filenames = listDumps();
-        if (filenames.length < 2) {
+        entries = readableDumps();
+        if (entries.size() < 2) {
             diffText.setText(R.string.diff_need_two);
             spinnerA.setEnabled(false);
             spinnerB.setEnabled(false);
             return;
         }
 
-        CharSequence[] labels = new CharSequence[filenames.length];
-        for (int i = 0; i < filenames.length; i++) {
-            labels[i] = labelFor(filenames[i]);
+        CharSequence[] labels = new CharSequence[entries.size()];
+        for (int i = 0; i < entries.size(); i++) {
+            labels[i] = labelFor(entries.get(i));
         }
 
         ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(this,
@@ -104,41 +102,36 @@ public class DiffActivity extends AppCompatActivity {
     }
 
     /**
-     * @return saved dump filenames, newest first.
+     * @return the readable dumps of the dumps directory, newest first. The bytes of every file are
+     * parsed, so renamed files and broken files cannot pretend to be something else; broken files
+     * are simply not offered for comparison.
      */
-    protected String[] listDumps() {
-        File dumpsDir = getExternalFilesDir(null);
-        String[] names = (dumpsDir == null) ? null : dumpsDir.list(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String filename) {
-                return filename.matches(Dump.FILENAME_REGEXP);
+    protected List<DumpGrouping.Entry> readableDumps() {
+        List<DumpGrouping.Entry> readable = new ArrayList<DumpGrouping.Entry>();
+        for (DumpGrouping.Entry entry
+                : DumpGrouping.newestFirst(DumpGrouping.read(getExternalFilesDir(null)))) {
+            if (entry.isReadable()) {
+                readable.add(entry);
             }
-        });
-        if (names == null) {
-            return new String[0];
         }
-        List<String> list = new ArrayList<String>(Arrays.asList(names));
-        Collections.sort(list);
-        Collections.reverse(list);
-        return list.toArray(new String[list.size()]);
+        return readable;
     }
 
     /**
-     * Short label for a dump file: "2026-11-03 13:04  55RUB" instead of the whole file name.
+     * Short label for a dump: "0000 000 111 · 2026-11-03 13:04 · 55 RUB". The card number and the
+     * balance come from the dump bytes, the time is when the file was written - never the file name.
      */
-    protected static String labelFor(String filename) {
-        Matcher m = Pattern.compile(Dump.FILENAME_REGEXP).matcher(filename);
-        if (!m.matches()) {
-            return filename;
-        }
-        String time = m.group(4);
-        return m.group(1) + "-" + m.group(2) + "-" + m.group(3)
-                + " " + time.substring(0, 2) + ":" + time.substring(2, 4)
-                + "  " + m.group(6) + "RUB";
+    protected static String labelFor(DumpGrouping.Entry entry) {
+        String when = (entry.getSavedAt() > 0)
+                ? new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US)
+                        .format(new Date(entry.getSavedAt()))
+                : "";
+        return Dump.formatCardNumber(entry.getCardNumber()) + " · " + when
+                + " · " + entry.getBalance() + " RUB";
     }
 
     protected void renderDiff() {
-        if (filenames.length < 2) {
+        if (entries.size() < 2) {
             return;
         }
         int positionA = spinnerA.getSelectedItemPosition();
@@ -147,9 +140,11 @@ public class DiffActivity extends AppCompatActivity {
             return;
         }
         try {
-            Dump a = load(filenames[positionA]);
-            Dump b = load(filenames[positionB]);
-            diffText.setText(buildDiff(filenames[positionA], a, filenames[positionB], b));
+            String nameA = entries.get(positionA).getFilename();
+            String nameB = entries.get(positionB).getFilename();
+            Dump a = load(nameA);
+            Dump b = load(nameB);
+            diffText.setText(buildDiff(nameA, a, nameB, b));
         } catch (IOException e) {
             diffText.setText(getString(R.string.diff_error, e.toString()));
         }

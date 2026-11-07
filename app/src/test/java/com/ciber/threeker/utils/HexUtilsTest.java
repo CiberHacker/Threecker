@@ -1,4 +1,4 @@
-package cc.troikadumper.utils;
+package com.ciber.threeker.utils;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;

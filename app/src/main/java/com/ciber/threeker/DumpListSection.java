@@ -1,4 +1,4 @@
-package cc.troikadumper;
+package com.ciber.threeker;
 
 import android.content.DialogInterface;
 import android.view.View;
@@ -10,11 +10,11 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.List;
 
-import cc.troikadumper.utils.DumpDetailsDialog;
-import cc.troikadumper.utils.DumpMetadata;
+import com.ciber.threeker.utils.DumpDetailsDialog;
+import com.ciber.threeker.utils.DumpMetadata;
 
 /**
  * Binds the "Dumps" tab: it lists the saved dump files grouped by card number (all groups start
@@ -84,52 +84,64 @@ public class DumpListSection {
                 if (row == null || row.isHeader()) {
                     return false;
                 }
-                showDumpActions(row.getFilename());
+                showDumpActions(row);
                 return true;
             }
         });
     }
 
     /**
-     * Re-reads the dumps directory and rebuilds the grouped list.
+     * Re-reads the dumps directory and rebuilds the grouped list. Every file is parsed, so the list
+     * always shows what the dumps really contain (a renamed or edited file cannot lie about its card
+     * number or balance) and a broken file is listed as unreadable instead of disappearing.
      */
     public void refresh() {
-        String[] filenames = (dumpsDir == null) ? null : dumpsDir.list(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String filename) {
-                return filename.matches(Dump.FILENAME_REGEXP);
-            }
-        });
-        if (filenames == null) {
-            filenames = new String[0];
-        }
-
         metadata.reload();
+        List<DumpGrouping.Entry> entries = DumpGrouping.read(dumpsDir, metadata);
+
         if (adapter == null) {
             // The activity (not the application context) is required: the rows are MaterialCardViews
             // and resolve ?attr/... against the activity theme.
-            adapter = new DumpListAdapter(activity, filenames, metadata);
+            adapter = new DumpListAdapter(activity, entries);
+            adapter.setListener(new DumpListAdapter.Listener() {
+                @Override
+                public void onDumpSelected(String filename) {
+                    DumpListSection.this.listener.onDumpSelected(filename);
+                }
+
+                @Override
+                public void onDumpActions(DumpListAdapter.Row row) {
+                    showDumpActions(row);
+                }
+            });
             listView.setAdapter(adapter);
         } else {
-            adapter.rebuild(filenames);
+            adapter.rebuild(entries);
         }
     }
 
     /**
-     * Offers to name/describe the dump, duplicate it, or delete it.
+     * Offers to name/describe the dump, duplicate it, or delete it. A file whose bytes cannot be
+     * parsed can only be deleted: there is nothing to show, duplicate or annotate.
      */
-    protected void showDumpActions(final String filename) {
-        new AlertDialog.Builder(activity)
-                .setTitle(R.string.dump_actions_title)
-                .setItems(new CharSequence[]{
+    protected void showDumpActions(final DumpListAdapter.Row row) {
+        final String filename = row.getFilename();
+        CharSequence[] items = row.isReadable()
+                ? new CharSequence[]{
                         activity.getString(R.string.action_edit_details),
                         activity.getString(R.string.action_duplicate),
-                        activity.getString(R.string.action_delete)
-                }, new DialogInterface.OnClickListener() {
+                        activity.getString(R.string.action_delete)}
+                : new CharSequence[]{activity.getString(R.string.action_delete)};
+
+        new AlertDialog.Builder(activity)
+                .setTitle(R.string.dump_actions_title)
+                .setItems(items, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (which == 0) {
-                            editDetails(filename);
+                        if (!row.isReadable()) {
+                            confirmDelete(filename);
+                        } else if (which == 0) {
+                            editDetails(row);
                         } else if (which == 1) {
                             duplicateDump(filename);
                         } else {
@@ -141,13 +153,19 @@ public class DumpListSection {
     }
 
     /**
-     * Lets the user attach a name and a description to the dump; the list refreshes on save.
+     * Lets the user attach a name and a description to the dump. They are written into the dump file
+     * itself, so they survive a rename and travel with a shared copy; the list refreshes on save.
      */
-    protected void editDetails(String filename) {
-        DumpDetailsDialog.show(activity, metadata, filename,
+    protected void editDetails(DumpListAdapter.Row row) {
+        if (dumpsDir == null) {
+            Toast.makeText(activity, R.string.error_read_file_title, Toast.LENGTH_LONG).show();
+            return;
+        }
+        DumpDetailsDialog.show(activity, new File(dumpsDir, row.getFilename()),
+                row.getName(), row.getDescription(),
                 new DumpDetailsDialog.OnSavedListener() {
                     @Override
-                    public void onDetailsSaved() {
+                    public void onDetailsSaved(String name, String description) {
                         Toast.makeText(activity, R.string.details_saved, Toast.LENGTH_SHORT).show();
                         refresh();
                     }
@@ -156,8 +174,9 @@ public class DumpListSection {
 
     /**
      * Writes a copy of the dump next to it, so the original file is never touched. The copy gets a
-     * fresh date/time based name and keeps the name/description of the original (with " (copy)"
-     * appended to the name). Its card group is expanded, so the new row is visible right away.
+     * fresh date/time based name and keeps everything else - blocks, name, description, scan time
+     * and, for an edited dump, the scanned blocks. Its card group is expanded, so the new row is
+     * visible right away.
      */
     protected void duplicateDump(String filename) {
         if (dumpsDir == null) {
@@ -169,6 +188,11 @@ public class DumpListSection {
         File copy;
         try {
             dump = Dump.fromFile(new File(dumpsDir, filename));
+            String name = dump.getName();
+            if (name != null) {
+                // The copy is marked as such, the original keeps its name.
+                dump.setName(activity.getString(R.string.dump_duplicate_name, name));
+            }
             copy = dump.saveCopy(dumpsDir);
         } catch (IOException e) {
             Toast.makeText(activity, activity.getString(R.string.error_duplicate)
@@ -176,32 +200,12 @@ public class DumpListSection {
             return;
         }
 
-        boolean detailsCopied = true;
-        try {
-            metadata.put(copy.getName(), duplicateName(filename),
-                    metadata.getDescription(filename));
-        } catch (IOException e) {
-            // The copy itself is valid, only the annotations are missing.
-            detailsCopied = false;
-            Toast.makeText(activity, activity.getString(R.string.error_save_details)
-                    + ": " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-
         if (adapter != null) {
             adapter.expandGroup(dump.getCardNumber());
         }
-        if (detailsCopied) {
-            Toast.makeText(activity, R.string.dump_duplicated, Toast.LENGTH_SHORT).show();
-        }
+        Toast.makeText(activity, activity.getString(R.string.dump_duplicated, copy.getName()),
+                Toast.LENGTH_SHORT).show();
         refresh();
-    }
-
-    /**
-     * @return the name of a duplicated dump, marked as a copy; null when the original had no name.
-     */
-    protected String duplicateName(String filename) {
-        String name = metadata.getName(filename);
-        return (name == null) ? null : activity.getString(R.string.dump_duplicate_name, name);
     }
 
     /**

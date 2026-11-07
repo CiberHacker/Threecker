@@ -67,15 +67,19 @@ The debug APK is signed with the automatic debug keystore, so it installs as-is.
 ## App features added on top of the original code
 
 * **Tabbed single screen** – one activity with three tabs: *Overwrite* (status, balance hero, card
-  fields, raw sector 8 and the write / share actions), *Dumps* (saved dumps grouped by card number,
-  every card collapsed by default, tap to expand/load, long press for details, duplicate or delete)
-  and *About* (description, write warnings, diff tool). The old overflow menu and the two floating
-  action buttons are gone, so there is no longer a second, duplicate route to the dump list.
+  fields, raw sectors 8 and 9 and the write / share actions), *Dumps* (saved dumps read from their bytes and
+  grouped by card number, every card collapsed by default, tap to expand/load, long press for
+  details, duplicate or delete) and *About* (description, write warnings, diff tool). The old
+  overflow menu and the two floating action buttons are gone, so there is no longer a second,
+  duplicate route to the dump list.
 * **Write safety** – the write action asks for confirmation first (card number, balance, last
   usage, dump UID), then refuses any card whose UID differs from the dump
   (`Dump.belongsTo`), and finally re-reads sector #8 and compares it with the dump
   (`Dump.verify`). Failures are reported in an `AlertDialog` instead of only appending to a status
   text, and a failed write no longer discards the loaded dump.
+* **Full-state restore** – dumps also capture sector 9's three data blocks when the card allows
+  it; the file carries them as optional `sector9_blockN` keys, writing restores both sectors
+  (trailers untouched) and verifies both, and old sector-8-only dumps keep working unchanged.
 * **Diff tool** (`DiffActivity`) – compares two saved dumps field by field (UID, card number,
   balance, last usage, validator, and the raw blocks) and reports how many fields differ.
 * **Dump annotations** (`utils/DumpMetadata`) – a name and a description per dump, stored in a
@@ -89,6 +93,22 @@ The debug APK is signed with the automatic debug keystore, so it installs as-is.
 * **Field editors** – an edit icon next to the balance, last usage, last validator and saved name
   opens the matching editor (numeric dialogs, date+time pickers, or the details dialog). The changes
   apply to the loaded dump and are written to the card by the regular write flow.
+* **Dumps are read, never guessed** – each refresh parses every dump file, so the card number,
+  balance and grouping come from the sector data; renaming a file (or a file name that lies)
+  changes nothing. A file that cannot be parsed is listed under "Unreadable files" with the
+  parser's reason, tapping it shows the error and the only action offered is *Delete*, so a single
+  broken file can never hide the rest of the list.
+* **One self-contained dump file** – the name, the description and the scan time live inside the
+  dump file (format v2, `threecker-dump v2` + `key: value` lines) instead of a sidecar, so they
+  survive a rename, are copied with the dump and travel with a shared file. Dumps written by older
+  builds are still read (five-line format); their name/description come from the old
+  `dump_metadata.properties` and everything is folded into the file the first time it is saved.
+  Writes are atomic (temp file, read back, rename), so an annotation edit cannot corrupt a dump.
+* **Edited dumps** – every field edit is written into the dump file immediately and keeps the
+  scanned blocks in it (`original0..3`). A restore arrow appears next to the edit icon of any changed
+  value and rolls only that value back (usage and validator share one 24-bit field, so they restore
+  together). The dumps list marks such rows with "· edited", and a verified write to the card saves
+  the edited state as well. Edits do not touch the status line, which keeps showing the loaded file.
 * **Collapsible cards** – every card-number group in the *Dumps* tab starts collapsed, so the tab
   opens as a short list of cards; a tap on a header hides/shows that card's dumps (animated
   chevron). The expanded state survives list refreshes.
@@ -102,9 +122,9 @@ The debug APK is signed with the automatic debug keystore, so it installs as-is.
 * **NFC without a restart** – when NFC is off, the app asks once per launch and shows an inline
   card with a deep link to the NFC settings. It listens for `ACTION_ADAPTER_STATE_CHANGED` and
   re-checks on resume, so toggling NFC is picked up immediately.
-* **Export** (`utils/DumpShare`) – shares the loaded dump as plain text or as JSON through any app
-  that handles `text/plain` (no storage permission, no `FileProvider`). Reachable from the
-  *Overwrite* tab.
+* **Export** (`utils/DumpShare`) – *As file* sends the dump itself through a `FileProvider` (blocks,
+  name, description, scan time, and the scanned blocks of an edited dump all in one file), *As text*
+  and *As JSON* send a readable summary. Reachable from the *Overwrite* tab.
 * **Null safety** – the dump list handles an unavailable/empty dumps directory instead of
   `NullPointerException`-ing on `list()`.
 
@@ -134,8 +154,9 @@ app/src/main/res/...
 
 1. **Standard source layout** – `java/`, `res/` and `AndroidManifest.xml` were moved under
    `app/src/main/` (moved with `git mv`, so history is preserved).
-2. **Namespace** – the manifest `package="cc.troikadumper"` attribute was replaced by
-   `namespace 'cc.troikadumper'` in `app/build.gradle`; AGP 8 no longer accepts it in the manifest.
+2. **Namespace** – the original flat project set `package="cc.troikadumper"` in the manifest; that was
+   replaced by `namespace` in `app/build.gradle` (AGP 8 no longer accepts it in the manifest). The
+   package/namespace/applicationId was later renamed to `com.ciber.threeker`.
 3. **AndroidX migration** – AGP 8 cannot consume the abandoned `com.android.support` libraries, so:
    * `android.support.v7.app.AppCompatActivity` → `androidx.appcompat.app.AppCompatActivity`
    * `android.support.v7.widget.Toolbar` → `androidx.appcompat.widget.Toolbar`
@@ -156,5 +177,5 @@ app/src/main/res/...
    existing screen layout. Bump both if you need them.
 8. **Null intent action** – `MainActivity.onCreate()` did `getIntent().getAction().equals(...)`, which
    throws `NullPointerException` when the activity starts without an action (e.g.
-   `adb shell am start -n cc.troikadumper/.MainActivity`, or some launcher/recents paths). It now
+   `adb shell am start -n com.ciber.threeker/.MainActivity`, or some launcher/recents paths). It now
    compares the constant against the action, so a null action is handled.

@@ -18,6 +18,33 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
+
+    <!-- DatePickerDialog / TimePickerDialog: passing this theme to their constructors is what
+         actually applies it (the android:datePickerDialogTheme attribute is ignored by the
+         platform pickers on some ROMs). Their OK/Cancel buttons come from the button bar styles,
+         which otherwise fall back to the dark colorPrimary. -->
+    <style name="Theme.Threecker.Picker" parent="Theme.Threecker.Dialog">
+        <!-- The framework DatePicker/TimePicker (and its CalendarView) read the platform
+             android: attrs, not the Material colorSurface/colorOnSurface, so in the night theme
+             their calendar stayed white while the day text turned white too (invisible numbers).
+             Map the platform background and text colors onto the app palette (surface/ink resolve
+             through values/ and values-night/, so both themes are legible). -->
+        <item name="android:colorBackground">@color/surface</item>
+        <item name="android:windowBackground">@color/surface</item>
+        <item name="android:textColorPrimary">@color/ink</item>
+        <item name="android:textColorSecondary">@color/ink_muted</item>
+        <item name="android:textColorTertiary">@color/ink_muted</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/ink</item>
+        <!-- OK/Cancel would otherwise inherit the dark colorPrimary and be unreadable -->
+        <item name="android:buttonBarButtonStyle">@style/Widget.Threecker.PickerButton</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/Widget.Threecker.PickerButton</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/Widget.Threecker.PickerButton</item>
+    </style>
+
+    <style name="Widget.Threecker.PickerButton" parent="android:Widget.Material.Button.Borderless">
+        <item name="android:textColor">@color/accent_text</item>
+    </style>
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
 

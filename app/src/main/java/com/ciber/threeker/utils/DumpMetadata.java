@@ -1,4 +1,4 @@
-package cc.troikadumper.utils;
+package com.ciber.threeker.utils;
 
 import java.io.File;
 import java.io.FileInputStream;

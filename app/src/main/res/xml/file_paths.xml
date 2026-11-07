@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Paths the dump FileProvider may hand out: the app's own external files directory, which is
+     also where the dumps are stored (getExternalFilesDir(null)). -->
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <external-files-path
+        name="dumps"
+        path="." />
+</paths>

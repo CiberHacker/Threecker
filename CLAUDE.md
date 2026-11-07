@@ -8,45 +8,44 @@ fixed to make the project buildable). Keep both in sync when you change the buil
 
 > **Git is off limits unless you are asked.** Never run `git add`, `git commit`, `git push`,
 > `git tag`, `git reset`, `git checkout` or any other command that changes the index, the history or
-> a remote on your own initiative - see rule 6 in section 2.
+> a remote on your own initiative - see rule 5 in section 2.
 
 ---
 
 ## 1. What this project is
 
 **Threecker** is a small single-module Android app (Java) for Moscow **Troika** transit cards.
-It talks to the card's **MIFARE Classic** chip over NFC, reads **sector 8**, decodes the travel
-data (card number, balance, last usage time, last validator), stores the raw sector as a text
-"dump" file, and can write a dump back to the same card (restore).
+It talks to the card's **MIFARE Classic** chip over NFC, reads **sector 8** (plus sector 9 when
+the card allows it), decodes the travel data (card number, balance, last usage time, last
+validator), stores the raw sectors as a text "dump" file, and can write a dump back to the same
+card (restore).
 
 * It is a fork of the original `TroikaDumper` project, which was an Eclipse/IntelliJ "flat"
   layout with no build system (sources in `java/`, `res/`, manifest at repo root). That layout
   was migrated to a standard Gradle layout with `git mv`, so file history is preserved.
-* The app brand is **Threecker**; the **package / namespace / applicationId is
-  `cc.troikadumper` and must stay that way** (see rule 1).
+* The app brand is **Threecker**; the package / namespace / applicationId is now
+  `com.ciber.threeker` (renamed from the original `cc.troikadumper`). The rename touched
+  `namespace`/`applicationId` in `app/build.gradle`, every `package`/`import`, the source tree
+  under `app/src/{main,test}/java/com/ciber/threeker/`, and the custom view class names in the XML
+  layouts. A new applicationId is a new app to Android, so stored dumps now live under
+  `Android/data/com.ciber.threeker/files/` (existing files were moved there by hand).
 
 ## 2. Non-negotiable rules
 
-1. **Do not rename the package.** `namespace 'cc.troikadumper'`, `applicationId 'cc.troikadumper'`,
-   every `package cc.troikadumper;`, every `import cc.troikadumper.*`, and
-   `cc.troikadumper:id/...` resource ids stay untouched. Changing `applicationId` breaks in-place
-   app updates (users lose their saved dumps) and every `R` reference in the source.
-   The brand name `Threecker` lives only in user-visible text (`@string/app_name`, docs, and the
-   `toText()` header - see section 9).
-2. **Do not weaken the write path.** Writing a dump to a card is deliberately guarded by three
+1. **Do not weaken the write path.** Writing a dump to a card is deliberately guarded by three
    steps: (a) a confirmation dialog listing card number / balance / last usage / dump UID,
    (b) `Dump.belongsTo(Tag)` - the target card UID must equal the dump UID, otherwise nothing is
-   written, (c) `Dump.verify(Tag)` - sector 8 is read back and compared with the dump. Removing or
-   bypassing any of these is a regression, not a simplification.
-3. **Keep the data format.** The dump file format, its filename scheme and its regexp are what
+   written, (c) `Dump.verify(Tag)` - the written sectors are read back and compared with the dump.
+   Removing or bypassing any of these is a regression, not a simplification.
+2. **Keep the data format.** The dump file format, its filename scheme and its regexp are what
    existing users' files on disk look like; `FILENAME_FORMAT` and `FILENAME_REGEXP` in
    `Dump.java` must change together and must keep matching old files.
-4. **No new dependencies without a reason.** Only `androidx.appcompat`, Material Components and
+3. **No new dependencies without a reason.** Only `androidx.appcompat`, Material Components and
    JUnit are declared. No Kotlin, no ViewBinding/DataBinding, no Compose, no DI, no Room - the app
    is a handful of `findViewById` activities by design.
-5. **All new user-visible text goes to `res/values/strings.xml`** and is referenced as `R.string.*`
+4. **All new user-visible text goes to `res/values/strings.xml`** and is referenced as `R.string.*`
    (use positional format args, e.g. `%1$s`, for anything dynamic).
-6. **It is FORBIDDEN to commit or push without an explicit request from the user.** Do not run
+5. **It is FORBIDDEN to commit or push without an explicit request from the user.** Do not run
    `git add`, `git commit`, `git push`, `git tag`, `git reset`, `git stash`, `git checkout` or any
    other command that changes the index, the history or a remote unless the user asked for it in
    that conversation. Finishing a task, passing tests or a tidy `git status` are **not** a request.
@@ -88,15 +87,15 @@ $env:JAVA_HOME = 'C:\Program Files\Java\jdk-17.0.1'
 ```powershell
 $adb = 'C:\CiberWork\SDK\platform-tools\adb.exe'
 & $adb install -r app\build\outputs\apk\debug\app-debug.apk
-& $adb shell am start -W -n cc.troikadumper/.MainActivity
-& $adb shell am force-stop cc.troikadumper
+& $adb shell am start -W -n com.ciber.threeker/.MainActivity
+& $adb shell am force-stop com.ciber.threeker
 & $adb logcat -d -b crash -t 20            # must stay empty after a smoke test
 & $adb shell uiautomator dump /sdcard/ui.xml   # then: & $adb shell cat /sdcard/ui.xml
 # label / package check:
 C:\CiberWork\SDK\build-tools\35.0.0\aapt2.exe dump badging app\build\outputs\apk\debug\app-debug.apk
 ```
 
-Expected from `aapt2`: `package: name='cc.troikadumper'`, `application-label:'Threecker'`.
+Expected from `aapt2`: `package: name='com.ciber.threeker'`, `application-label:'Threecker'`.
 
 On Linux/macOS use `./gradlew` and `/path/to/adb`. On Windows use PowerShell semantics (`;` between
 commands, backtick escapes), not `cmd`/`bash` syntax.
@@ -118,16 +117,17 @@ app/src/main/java/cc/troikadumper/
     MainActivity.java        single screen with 3 tabs: NFC dispatch, read/write, rendering
     CardFlipView.java        3D two-sided card container (front/back children, card aspect ratio)
     TroikaCardBackView.java  paints the card back artwork and the number/balance into its fields
-    Dump.java                domain model: card IO, parsing, file IO, text/JSON export
+    Dump.java                domain model: card IO, parsing, annotations, edits, file IO, text/JSON export
+    DumpFile.java            the dump file format: v2 read/write (atomic) + legacy five-line reader
     DumpListSection.java     binds the Dumps tab: list, load, details/duplicate/delete on long press
     DumpListAdapter.java     BaseAdapter: header rows per card + dump rows (name/label/description)
-    DumpGrouping.java        groups dump filenames by card number (pure JVM, unit tested)
+    DumpGrouping.java        reads every dump file, groups it by the card number in its bytes (pure JVM)
     DumpDiff.java            field-by-field dump comparison rows (pure JVM, unit tested)
     DiffActivity.java        two spinners over the saved dumps + comparison text
     utils/HexUtils.java      byte[] <-> uppercase hex String
-    utils/DumpMetadata.java  sidecar Properties file: name/description per dump
-    utils/DumpDetailsDialog  name/description dialog for one dump
-    utils/DumpShare.java     ACTION_SEND chooser (plain text or JSON)
+    utils/DumpMetadata.java  legacy sidecar (pre-v2 names), read-only migration helper
+    utils/DumpDetailsDialog  name/description dialog; writes them into the dump file
+    utils/DumpShare.java     ACTION_SEND chooser: the dump file (FileProvider), text or JSON
     utils/ThemeMode.java     persisted light/dark choice (AppCompatDelegate night mode)
 app/src/main/res/
     layout/activity_main.xml       AppBarLayout + Toolbar + TabLayout + the 3 panels
@@ -155,15 +155,14 @@ app/src/main/res/
     values-night/colors.xml        full dark palette, same color names as values/
     mipmap-*/                      launcher icons
 app/src/test/java/cc/troikadumper/
-    DumpTest.java            parsing / filename / export / setBalance / field editors / copies (21 tests)
-    DumpGroupingTest.java    grouping and ordering (7 tests)
+    DumpTest.java            parsing / filename / export / file format v2 / sector 9 / edits / restores (40 tests)
+    DumpGroupingTest.java    reading, grouping, ordering, annotations, migration (15 tests)
     DumpDiffTest.java        comparison rows (4 tests)
     utils/DumpMetadataTest.java  sidecar annotations (9 tests)
     utils/HexUtilsTest.java  hex conversion (6 tests)
 
 BUILDING.md                  build/install instructions + what had to be fixed
 README.md                    original Russian user guide (UTF-8, Cyrillic - see gotcha 11)
-supported_phones_list.txt    NFC-capable phone list linked from README
 CLAUDE.md                    this file
 ```
 
@@ -186,12 +185,13 @@ whole tabbed UI; `DiffActivity` is the only other screen.
 | `DumpListSection` | Binds the Dumps tab: refresh from disk, tap = load, long press = details/duplicate/delete |
 | `DumpListAdapter` | `BaseAdapter`: one header row per card number + dump rows (name / date+balance / description) |
 | `DiffActivity` | Two spinners over the dump files + field-by-field comparison |
-| `Dump` | Raw `uid` + `byte[4][16]` sector data, parsing, `fromTag`/`fromFile`/`save`/`write`/`verify`, `toText`/`toJson` |
-| `DumpGrouping` | Groups and orders dump filenames by card number (pure JVM, no Android deps) |
+| `Dump` | Raw `uid` + `byte[4][16]` sector 8 data (+ optional sector 9 blocks), parsing, annotations, edits (`original` blocks), `fromTag`/`fromFile`/`save`/`saveChanges`/`write`/`verify`, `toText`/`toJson` |
+| `DumpFile` | The dump file format: `read` (v2 + legacy), `serialize`, atomic `write` (pure JVM, no Android deps) |
+| `DumpGrouping` | Reads every `*.txt` dump (`read`), parses its bytes, groups by the parsed card number (pure JVM, no Android deps) |
 | `DumpDiff` | Builds the comparison rows for `DiffActivity` (pure JVM) |
-| `DumpMetadata` | Sidecar `dump_metadata.properties`: name and description per dump file |
-| `DumpDetailsDialog` | Name/description dialog, used from the Dumps tab |
-| `DumpShare` | Builds the `ACTION_SEND` intent: text or JSON, no files, no `FileProvider` |
+| `DumpMetadata` | Legacy sidecar `dump_metadata.properties`; read-only, used to migrate pre-v2 names |
+| `DumpDetailsDialog` | Name/description dialog; writes them into the dump file via `Dump.updateDetails` |
+| `DumpShare` | `ACTION_SEND`: the dump file through `FileProvider`, or text/JSON |
 | `HexUtils` | Hex encoding used by the dump format and all on-screen output |
 
 ### NFC entry points
@@ -220,8 +220,9 @@ the Overwrite tab. There is no activity result contract any more - `INTENT_READ_
    Cancelling either reset `writeMode`.
 3. Next card tap: `writeDumpToCard(tag)` -> UID pre-check `dump.belongsTo(tag)`; on mismatch an
    `AlertDialog` (`error_uid_mismatch_*`) is shown and nothing is written.
-4. `dump.write(tag)` writes the first `BLOCK_COUNT - 1` blocks of sector 8; the sector trailer that
-   holds the keys is never written.
+4. `dump.write(tag)` first writes sector 9 when the dump has it (aborting before touching
+   anything if that sector cannot be authenticated), then the first `BLOCK_COUNT - 1` blocks of
+   sector 8; the trailers that hold the keys are never written.
 5. `dump.verify(tag)` re-reads those blocks; the result selects `status_written_verified` or
    `status_written_unverified` in the status pill.
 6. `IOException` -> `showError(error_write_title, ...)`; the loaded dump is kept so the user can
@@ -229,7 +230,8 @@ the Overwrite tab. There is no activity result contract any more - `INTENT_READ_
 
 ### Read sequence
 
-`Dump.fromTag(tag)` authenticates sector 8, reads its 4 blocks and builds a `Dump` (whose
+`Dump.fromTag(tag)` authenticates sector 8, reads its 4 blocks, then reads sector 9's three data
+blocks (null when the card refuses) and builds a `Dump` (whose
 constructor parses the fields), then `saveDump()` stores the raw text file and `renderDump()`
 fills the Overwrite tab. A save failure is reported separately and **keeps the dump loaded**, so
 the card data can still be inspected or written back. Reading from a file (`Dump.fromFile`) skips
@@ -276,25 +278,49 @@ Persisted facts about writing:
 ## 8. Dump files on disk
 
 * Directory: `getApplicationContext().getExternalFilesDir(null)`, i.e.
-  `/sdcard/Android/data/cc.troikadumper/files/`. App-specific external storage, so **no storage
+  `/sdcard/Android/data/com.ciber.threeker/files/`. App-specific external storage, so **no storage
   permission is involved** and the app uninstalls cleanly. It can be `null` (unmounted storage) -
   the list screens handle that, `save()` throws `IOException`.
 * Name: `FILENAME_FORMAT = "%04d-%02d-%02d_%02d%02d%02d_%d_%dRUB.txt"`, i.e.
-  `2026-11-03_135522_30050636_430RUB.txt` (date, time, card number, balance).
-  Date/time are zero padded, so a plain string sort is chronological - which is exactly what the
-  list screens rely on (`Arrays.sort` + reverse = newest first).
-* `FILENAME_REGEXP` mirrors the name for filtering the directory and for building labels. It is
-  deliberately loose about card number and balance (`[0-9]+`) so old files still match.
-  Change `FILENAME_FORMAT` and `FILENAME_REGEXP` together and never orphan existing files.
-* Content: exactly 5 ASCII lines, CRLF:
-  `UID hex`, then `block 0..3` as 32 uppercase hex chars each. `save()` and `saveCopy()` write that
-  layout (`writeTo`), `fromFile()` reads exactly 5 lines with `Scanner(..., "US-ASCII")`. Extra
-  trailing lines are ignored, missing lines throw. Do not add a BOM, headers or comments to this
-  file - it is the durable user data of the app.
-* `saveCopy(dir)` backs "Duplicate": it writes the same bytes under a fresh `FILENAME_FORMAT` name
-  of the current time, and when that name is taken (same second) it advances the timestamp by a
-  second until free, so an existing dump is never overwritten. The caller copies the name and
-  description with `DumpMetadata.put(copyName, ...)` (the name gets `@string/dump_duplicate_name`).
+  `2026-11-03_135522_30050636_430RUB.txt` (date, time, card number, balance). The name is a
+  convenience for the user (`adb pull`, file managers) - **nothing in the app reads it**, with one
+  exception: the scan time of a pre-v2 file, which has no timestamp of its own
+  (`DumpFile.legacyScanTime`). Card number and balance always come from the dump bytes.
+* `FILENAME_REGEXP` matches that written name; it is no longer used to filter the directory or to
+  build labels. The list scans the directory for `*.txt` (`DumpGrouping.EXTENSION`), which keeps
+  externally renamed dumps visible. Change `FILENAME_FORMAT` and `FILENAME_REGEXP` together and
+  never orphan existing files.
+* Content (format **v2**, written and read by `DumpFile`): one self-contained UTF-8 text file per
+  dump, `key: value` per line, text values escaped (`\\`, `\n`, `\r`):
+
+  ```
+  threecker-dump v2
+  uid: 0446855A594D80
+  sector: 8
+  scanned: 2026-11-06T12:38:32+0300
+  name: School card                        <- optional
+  description: line one\nline two          <- optional
+  block0: 45DB100A0F51FE196BA2A40000000000
+  block1: ... (block2, block3)
+  original0: ... (original1..3, only while the dump is edited)
+   sector9_block0: ... (sector9_block1..2, optional - sector 9 when readable)
+  ```
+
+  Unknown keys are ignored, so the format can grow. `blockN` is the only source of truth: `name`,
+  `description` and `scanned` are annotations, and the card number/balance are always re-parsed from
+  the blocks. A line-based format (not JSON) keeps the file readable, diffable and hand-editable,
+  needs no dependency and still runs in plain JVM tests - `org.json` is only a stub there.
+* Old files (five bare lines: UID, then blocks 0..3) are still read by `DumpFile.parseLegacy`; their
+  scan time comes from the (app generated) name, and their name/description from the legacy sidecar
+  (`DumpMetadata`, merged by `DumpGrouping.read`). The first save folds all of it into the file;
+  **nothing is rewritten at startup**.
+* Writing is atomic (`DumpFile.write`): the content goes to `<name>.tmp`, is read back and compared,
+  and only then renamed over the target - an interrupted annotation edit can never destroy a dump.
+  Never write a dump file another way (the old in-place `FileOutputStream` is gone on purpose).
+* `saveCopy(dir)` backs "Duplicate": same content (blocks, name, description, scan time, original
+  blocks) under a fresh `FILENAME_FORMAT` name of the current time; when that name is taken (same
+  second) the timestamp advances by a second, so an existing dump is never overwritten. No sidecar
+  entry is needed any more.
 
 ## 9. Export formats and sharing
 
@@ -321,6 +347,12 @@ brand name; if the app is ever renamed again, update it here too.
 "threecker-dump-v1" without a migration story. `cardNumber` is the formatted string (with spaces),
 while `balance`, `lastValidatorId` and `sector` are raw numbers; `lastUsageDate` is
 `yyyy-MM-dd'T'HH:mm:ssZ` in `Locale.US` or `null` for a never-used card.
+
+The dump **file** (section 8) is the richest export and the only one that can come back into the
+app: `Share -> As file` sends it through `androidx.core.content.FileProvider`
+(authority `${applicationId}.dumps`, paths in `res/xml/file_paths.xml`), so the receiver gets the
+blocks, the name, the description, the scan time and - for an edited dump - the scanned blocks.
+`toJson()`/`toText()` are exports for humans and tools; they are not the file format.
 
 Sharing is text only: `DumpShare.share(activity, dump, asJson)` builds an `ACTION_SEND` intent with
 type `text/plain`, subject `@string/share_subject` and the body from `toText()`/`toJson()`. There is
@@ -360,11 +392,19 @@ ABOUT      app description, write warnings, Diff tool -> DiffActivity
 * Per-field editors: the balance hero, last usage, last validator and saved-as rows each have an
   `ic_edit` button (`btn_edit_balance` / `btn_edit_usage` / `btn_edit_validator` /
   `btn_edit_saved_as`). The balance icon sits next to the big value, not next to the 11sp label: a
-  40dp icon in the label row inflated that row and pushed the label ~12dp down. They change the
-  **in-memory** dump only; the file and the card are written
-  by the regular write flow. Balance/validator use numeric dialogs, usage uses
-  `DatePickerDialog` + `TimePickerDialog`, saved-as opens `DumpDetailsDialog`. Usage and validator
-  share one 24-bit field (see `Dump.parse`), so editing either changes the other.
+  40dp icon in the label row inflated that row and pushed the label ~12dp down. Balance/validator use
+  numeric dialogs, usage uses `DatePickerDialog` + `TimePickerDialog` (pass
+  `R.style.Theme_Threecker_Picker` to both - the platform pickers ignore the theme attribute and
+  would render black OK/Cancel), saved-as opens `DumpDetailsDialog`. Every edit is written to the
+  dump file immediately (`persistEdits()` -> `Dump.saveChanges`), so the file never lags behind the
+  screen. Editing does **not** touch the status pill: it keeps showing "Dump loaded: ...".
+* Per-field restore: while a value differs from the scanned one, an `ic_restore` button appears next
+  to that field's edit icon (`btn_restore_balance` / `btn_restore_usage` / `btn_restore_validator`,
+  shown from `renderDump()` via `Dump.isBalanceChanged()` / `isLastPassChanged()`). It rolls back
+  only that value (`Dump.restoreBalance()` / `restoreLastPass()`) and rewrites the file. Usage and
+  validator share one 24-bit field, so restoring either restores both - that is why both icons show
+  up together. `Dump.isEdited()` (whole blocks) still drives the "· edited" marker in the list and
+  the `originalN` lines in the file.
 * Card: `CardFlipView` expects exactly two children - the front face and the back
   `TroikaCardBackView` - and derives its height from the 85.6x54 mm ratio. The front face is a
   `FrameLayout` holding the artwork plus the `@id/card_flip_hint` pill (`bg_card_hint`,
@@ -378,14 +418,18 @@ ABOUT      app description, write warnings, Diff tool -> DiffActivity
   X in the status pill calls `closeDump()` (unloads, never deletes), and the flipped state is saved
   in `onSaveInstanceState`.
 * Dumps panel (`panel_dumps.xml`): `@id/dump_list_view` + `@id/dump_list_empty`
-  (`ListView.setEmptyView`), driven by `DumpListSection`/`DumpListAdapter`. Rows are
-  `MaterialCardView`s, so the adapter must be built with the **activity** context - an application
-  context carries the platform theme and crashes while inflating `?attr/...`. A tap on a card
-  header calls `DumpListAdapter.toggleGroup(position)`; the expanded card numbers live in
-  `expandedCards`, which starts **empty**, so every group opens collapsed and the state survives
-  `refresh()`. `expandGroup(cardNumber)` is used after a duplicate so the new row is visible. A
-  long press offers details / duplicate / delete, and delete asks for confirmation before removing
-  the file and calling `DumpMetadata.remove(...)`.
+  (`ListView.setEmptyView`), driven by `DumpListSection`/`DumpListAdapter`. `refresh()` calls
+  `DumpGrouping.read(dir)`, i.e. **every dump file is parsed on every refresh** (app start, tab
+  switch, after delete/duplicate); the file name is never used for card number, balance or time
+  (the time comes from `File.lastModified()`). Files that fail to parse become unreadable entries in
+  a trailing "Unreadable files" group: tapping one shows the parse error, the long-press menu offers
+  only *Delete*. Rows are `MaterialCardView`s, so the adapter must be built with the **activity**
+  context - an application context carries the platform theme and crashes while inflating
+  `?attr/...`. A tap on a card header calls `DumpListAdapter.toggleGroup(position)`; the expanded
+  card numbers live in `expandedCards`, which starts **empty**, so every group opens collapsed and
+  the state survives `refresh()`. `expandGroup(cardNumber)` is used after a duplicate so the new row
+  is visible. A long press on a readable dump offers details / duplicate / delete, and delete asks
+  for confirmation before removing the file and calling `DumpMetadata.remove(...)`.
 * About panel (`panel_info.xml`): version from `PackageManager`, the write warnings,
   `@id/btn_diff_tool` -> `DiffActivity`.
 * `DiffActivity`: two spinners over the newest-first filename list; fewer than two dumps disables
@@ -419,8 +463,8 @@ ABOUT      app description, write warnings, Diff tool -> DiffActivity
 ## 11. Testing
 
 * Location: `app/src/test/java/...` (JVM tests only; there are no instrumented/androidTest tests).
-* Current state: **47 tests** - `DumpTest` (21), `DumpGroupingTest` (7), `DumpDiffTest` (4),
-  `DumpMetadataTest` (9), `HexUtilsTest` (6) - all green.
+* Current state: **74 tests** - `DumpTest` (40), `DumpGroupingTest` (15), `DumpMetadataTest` (9),
+  `HexUtilsTest` (6), `DumpDiffTest` (4) - all green.
 * Run: `.\gradlew.bat testDebugUnitTest`, HTML report in
   `app/build/reports/tests/testDebugUnitTest/index.html`.
 * Covered: `Dump.intval`, `Dump.formatCardNumber`, parsing of card number / balance / validator /
@@ -432,8 +476,9 @@ ABOUT      app description, write warnings, Diff tool -> DiffActivity
   or a mocking library that the project does not have - do not add tests that instantiate them.
 * `testOptions.unitTests.includeAndroidResources = true` is set, so resource access from JVM tests
   is possible if ever needed.
-* Anything involving a real card (read, write, verify, UID mismatch) can only be verified by hand
-  on hardware - see the manual checklist in section 14.
+* Anything involving a real card (read, write, verify, UID mismatch) is verified by hand on the
+  physical cards: the spare card for destructive tests (restorable from a dump), the working card
+  for real-balance checks - see the manual checklist in section 14.
 
 ## 12. Conventions
 
@@ -459,9 +504,9 @@ ABOUT      app description, write warnings, Diff tool -> DiffActivity
 1. **JDK on PATH may be too new.** Gradle 8.11 rejects JDK 25. Set
    `$env:JAVA_HOME = 'C:\Program Files\Java\jdk-17.0.1'` before `gradlew`. Android Studio uses its
    bundled JBR and does not need this.
-2. **Package vs brand.** `cc.troikadumper` everywhere in code/build; `Threecker` only in
-   user-visible text. A "clean rename" of the package is a breaking change (see rule 1). Custom views
-   in XML must use the real package: `<cc.troikadumper.CardFlipView>`, not `com.troikadumper...`
+2. **Package vs brand.** `com.ciber.threeker` everywhere in code/build (renamed from
+   `cc.troikadumper`); `Threecker` only in user-visible text. Custom views in XML must use the
+   real package: `<com.ciber.threeker.CardFlipView>`, not `com.troikadumper...`
    (the wrong prefix fails at runtime with `ClassNotFoundException`, not at build time).
 3. **The manifest has no `package` attribute.** AGP 8 rejects it; the package name comes from
    `namespace` in `app/build.gradle`. Adding it back breaks the build.
@@ -489,18 +534,27 @@ ABOUT      app description, write warnings, Diff tool -> DiffActivity
 13. **Deprecated APIs are used deliberately**: `Date.getYear()/getMonth()/getDate()`,
     `new Date(y,m,d,h,min,s)`, `ProgressDialog`, and the AppCompat `AlertDialog`. They match the
     legacy behaviour; modernise them only in a dedicated change with a device check.
-14. **Dump files are `US-ASCII`.** Never write non-ASCII text (or a BOM) into them - `fromFile`
-    reads with `Scanner(fs, "US-ASCII")`.
+14. **Dump files are UTF-8 text (since format v2)** and may contain non-ASCII names/descriptions;
+    `DumpFile.escape` turns `\\`, `\r` and `\n` into escapes, so a value never breaks the line
+    layout. Do not write a BOM and do not put a raw newline into a value. Legacy five-line files are
+    still read.
 15. **`intval` builds an `int` via `Math.pow`**, so values above 2^31 overflow. Card fields are far
     smaller; do not reuse it for arbitrary-length values.
-16. **`DumpGrouping` sorts a copy**, so the caller's `String[]` is untouched; rows are ordered
-    newest first and groups with an unknown card number come last. `DumpListAdapter` is a
-    `BaseAdapter` with header rows - disabled items are headers, so taps ignore them.
-17. **Never change `applicationId` or bump `versionCode`/`versionName` casually.** Same id = in-place
-    update that keeps the user's dumps; a new id looks like a different app and loses them.
-18. **No NFC on emulators and no way to simulate a tag over adb.** Card read/write/verify paths can
-    only be exercised by a human with a physical Troika card. Review them carefully and state that
-    they were not executed.
+16. **`DumpGrouping.read` parses every dump file, `group` sorts a copy**, so the caller's list is
+    untouched; entries are newest first by `Entry.getTimestamp()` (the scan time stored in the file,
+    falling back to the file timestamp) and the unreadable group comes last. Never derive the card
+    number or balance from the file name - a renamed or hand-edited file must still show its real
+    content. `DumpListAdapter` is a `BaseAdapter` with header rows - disabled items are headers, so
+    taps ignore them.
+17. **Changing `applicationId` has consequences; casual version bumps too.** Same id = in-place
+    update that keeps the user's dumps; a new id looks like a different app and loses them - the
+    planned package rename has to account for that. `versionCode`/`versionName` should not be
+    bumped without a reason.
+18. **No NFC on emulators and no way to simulate a tag over adb.** Card read/write/verify paths are
+    exercised by hand with physical Troika cards: a spare card covers read/write/verify and the
+    UID-mismatch dialog (restore it from a dump if anything goes wrong), the working card covers
+    checks that need a real balance change. Run the test and report the observed result - do not
+    skip it by claiming hardware is unavailable.
 19. **The app does not log.** There is no `Log.*` usage; failures are shown in the UI (dialog +
     status text). After a smoke test, `adb logcat -d -b crash` must be empty.
 20. **Every color used by a layout must exist in `values-night/colors.xml` too.** A missing night
@@ -514,8 +568,15 @@ ABOUT      app description, write warnings, Diff tool -> DiffActivity
     independent without new evidence from a real card.
 23. **A duplicate must never overwrite the original.** The dump name only has one-second
     resolution, so duplicating twice within a second yields the same `FILENAME_FORMAT` string;
-    `saveCopy()` walks the timestamp forward until the name is free. Keep the name inside
-    `FILENAME_REGEXP`, otherwise the list (which filters by it) will not show the copy.
+    `saveCopy()` walks the timestamp forward until the name is free. Keep the name ending in
+    `.txt` (`DumpGrouping.EXTENSION`), otherwise the list will not show the copy.
+24. **A dump file is replaced only through `DumpFile.write`** (tmp file, read back, rename). Name,
+    description, field edits and per-field restores all rewrite the dump itself, so a non-atomic
+    write would risk the user's data. `originalN` lines must only exist while the blocks differ from
+    them.
+25. **The FileProvider authority is `${applicationId}.dumps`** (manifest) and must match
+    `DumpShare.AUTHORITY_SUFFIX`; its paths (`res/xml/file_paths.xml`, `external-files-path` = the
+    dumps directory) must cover the dumps, or `getUriForFile` throws and "As file" silently fails.
 
 ## 14. Verification checklist
 
@@ -524,16 +585,17 @@ Before handing work back:
 1. Build passes: `.\gradlew.bat assembleDebug` (with `JAVA_HOME` set as in section 4).
 2. `.\gradlew.bat testDebugUnitTest` - 40+ tests green (add tests when you add pure logic).
 3. If the APK changed: `adb install -r app\build\outputs\apk\debug\app-debug.apk`, then
-   `adb shell am start -W -n cc.troikadumper/.MainActivity` and confirm `Status: ok`.
+   `adb shell am start -W -n com.ciber.threeker/.MainActivity` and confirm `Status: ok`.
 4. `adb logcat -d -b crash -t 20` is empty.
-5. `aapt2 dump badging ...` still reports `package: name='cc.troikadumper'` and
+5. `aapt2 dump badging ...` still reports `package: name='com.ciber.threeker'` and
    `application-label:'Threecker'`.
 6. For UI changes: `adb shell uiautomator dump /sdcard/ui.xml` (and/or screenshots) to confirm the
    expected labels are on screen; check all three tabs, with and without a loaded dump, and in both
    light and dark themes (the toolbar icon toggles them).
-7. For NFC/write changes: describe the manual steps (load a dump, **Write to card** -> confirm -> tap
-   the same card; tap a *different* card to see the UID-mismatch dialog) and say explicitly that
-   they were not executed without hardware.
+7. For NFC/write changes: run them on the physical cards - spare card first (load a dump,
+   **Write to card** -> confirm -> tap the same card; tap a *different* card to see the
+   UID-mismatch dialog; restore the spare from a dump if needed), working card for real balance
+   changes. Describe the steps and the observed result.
 8. Delete artefacts you created: screenshots (`_*.png`), redirected logs (`_r.txt`, `_re.txt`),
    `/sdcard/ui.xml`, and any synthetic dumps pushed to the device or left in the repo.
 9. `git status` / `git diff` review: no `build/`, no `local.properties`, no `.idea/`, no temp files;
@@ -546,8 +608,10 @@ Before handing work back:
 2. Search before you add: look for the string/id/method you intend to create, so you reuse
    `HexUtils`, `DumpShare`, `showError`, `renderDump`, `FILENAME_REGEXP`, etc.
 3. Make the smallest change that solves the task, in the existing style, with no new dependencies
-   and without touching the package name, SDK levels, dump format or the write-safety chain.
-4. Build, run the unit tests, and install + smoke test on a device when behaviour or UI changed.
+   and without touching SDK levels, dump format or the write-safety chain (the package rename is
+   a separate, explicit task).
+4. Build, run the unit tests, and install + smoke test on a device when behaviour or UI changed;
+   NFC changes are additionally tested on the physical cards (spare card first).
 5. Update the docs you invalidated: `BUILDING.md` (build/config/toolchain), `README.md`
    (user-facing behaviour, keep UTF-8), `res/values/strings.xml` (text), and this file when the
    structure, commands, invariants or gotchas change.
@@ -564,6 +628,37 @@ Before handing work back:
 | Build tools | `C:\CiberWork\SDK\build-tools\35.0.0` |
 | adb | `C:\CiberWork\SDK\platform-tools\adb.exe` |
 | Test device | realme RMX3823, Android 16 (API 36), NFC present |
-| Last verified | `assembleDebug` + `assembleRelease` + `clean assembleDebug` succeed; 17/17 unit tests; app installs, launches and renders every screen without crashing |
+| Last verified | `assembleDebug` + `assembleRelease` + `clean assembleDebug` succeed; 74/74 unit tests; app installs, launches and renders every screen without crashing |
 
 If the SDK or JDK moves, update `local.properties` (never commit it) and sections 4 and 16 here.
+
+## 17. mt-apk MCP - patching the official Metro app
+
+An **mt-apk MCP server** (tools prefixed `mt_apk_`) is available for when we need to know what the
+official **MoskowMetro** app (`ru.mosmetro.metro`) does with a card: it opens, searches, edits and
+rebuilds APKs in place.
+
+| Item | Value |
+|---|---|
+| APK folder | `/storage/emulated/0/MT2/mcp/` (MT Manager's folder on the test device) |
+| Pristine source | `MoskowMetro_4.5.10_apks_kill.apk` - keep untouched |
+| Instrumented build | `MoskowMetro_4.5.10_nfclog2.apk` - currently installed |
+
+The instrumented build routes every patch log through `PatchLog`, which writes to **logcat and**
+the file `Android/data/ru.mosmetro.metro/files/nfcpatch.log` (the file survives logcat rollover):
+
+| Tag | Captures |
+|---|---|
+| `NfcPatch` | app start, log-file path, init/write errors |
+| `NfcReadLog` | read sessions (requested sectors), per-block payloads `READ ... b64=`, failed attempts |
+| `NfcWriteLog` | write sessions (which sectors the official flow writes), per-block payloads, failures |
+| `NfcKeyLog` | every authentication: sector, key type, Base64 key value |
+
+Capture with `adb logcat -d -s NfcPatch NfcKeyLog NfcReadLog NfcWriteLog`, or simply read the
+file. A free balance check already yields the READ payloads and all key values; WRITE payloads
+require a real top-up. mt-apk edit workspaces do not survive a restart - build and install
+promptly; the built APKs stay on the device.
+
+Findings baked into Threecker from this instrumentation: the official top-up writes **sectors 9
+and 8** (sector 9 first, six blocks, trailers untouched), the server key catalog matches the
+constants in `Dump.java` (sector 8 KeyB == `KEY_B`), and sector 9 KeyB == `KEY_9`.
